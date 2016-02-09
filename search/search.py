@@ -73,13 +73,33 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
     
 def graphSearch(problem, frontier):
-    """
-    Once your DFS, BFS, and UCS algorithms work, unify them
-    into a single, iterative graphSearch algorithm that
-    requires only an object to manage the fringe.
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
+    for node in problem.getSuccessors(problem.getStartState()):
+        addNode(node, [], 0, frontier)
+
+    closed = [problem.getStartState()]
+
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        path = node[1]
+        cost = node[2]
+        node = node[0]
+
+        if problem.isGoalState(node[0]):
+            path.append(node[1])
+            return path
+
+        if not node[0] in closed:
+            path.append(node[1])
+            closed.append(node[0])
+            successors = problem.getSuccessors(node[0])
+            for successor in successors:
+                if not successor[0] in closed:
+                    addNode(successor, list(path), cost, frontier)
+
+    return path
 
 def depthFirstSearch(problem):
     """
@@ -96,18 +116,33 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    stack = util.Stack()
+
+    return graphSearch(problem, stack)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    queue = util.Queue()
+
+    return graphSearch(problem, queue)
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    priorityQueue = util.PriorityQueue()
 
+    return graphSearch(problem, priorityQueue)
+
+def addNode(node, path, cost, frontier):
+    if isinstance(frontier, util.PriorityQueue):
+        cost += node[2]
+        frontier.push([node, path, cost], cost)
+    else:
+        frontier.push([node, path, 0])
 
 # Abbreviations
 bfs = breadthFirstSearch
