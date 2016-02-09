@@ -12,6 +12,10 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+# Tyler Gauch
+# COMP 3770 01
+# 1/11/2015
+
 """
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
@@ -73,31 +77,32 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
     
 def graphSearch(problem, frontier):
-    if problem.isGoalState(problem.getStartState()):
+    if problem.isGoalState(problem.getStartState()):                        #if we start on the goal state we are done
         return []
 
-    for node in problem.getSuccessors(problem.getStartState()):
+    for node in problem.getSuccessors(problem.getStartState()):             #add the first nodes successors to the frontier
         addNode(node, [], 0, frontier)
 
-    closed = [problem.getStartState()]
+    closed = [problem.getStartState()]                                      #add the first node to the closed list
 
-    while not frontier.isEmpty():
-        node = frontier.pop()
-        path = node[1]
-        cost = node[2]
-        node = node[0]
+    while not frontier.isEmpty():                                           #for the rest of the nodes do the following
+        node = frontier.pop()                                               #get next node
+        path = node[1]                                                      #get path took to current node
+        cost = node[2]                                                      #get cost taken to current node
+        node = node[0]                                                      #get current node
 
-        if problem.isGoalState(node[0]):
-            path.append(node[1])
+        if problem.isGoalState(node[0]):                                    #if it is the goal state return the path
+            path.append(node[1])                                            #add node to path before returning
             return path
 
-        if not node[0] in closed:
-            path.append(node[1])
-            closed.append(node[0])
-            successors = problem.getSuccessors(node[0])
-            for successor in successors:
-                if not successor[0] in closed:
-                    addNode(successor, list(path), cost, frontier)
+        
+        if not node[0] in closed:                                           #if we havent visted it
+            path.append(node[1])                                            #add to the path
+            closed.append(node[0])                                          #add to the closed list
+            successors = problem.getSuccessors(node[0])                     #get successor nodes
+            for successor in successors:                    
+                if not successor[0] in closed:                              #if not in the closed list
+                    addNode(successor, list(path), cost, frontier)          #add to the open list
 
     return path
 
