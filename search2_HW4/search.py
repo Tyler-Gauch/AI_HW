@@ -77,37 +77,23 @@ def graphSearch(problem, frontier):
 
     startState = problem.getStartState()
     closed = set()
-    
-    if problem.isGoalState(startState):                        #if we start on the goal state we are done
-        return []
-    
-    for node in problem.getSuccessors(startState):             #add the first nodes successors to the frontier
-        addNode(node, [], 0, frontier)
-    
-    closed.add(startState)                                      #add the first node to the closed list
-    
+
+    frontier.push((startState, [], 0))
+
 
     while not frontier.isEmpty():                                           #for the rest of the nodes do the following
-        node = frontier.pop()                                               #get next node
-        path = node[1]                                                      #get path took to current node
-        cost = node[2]                                                      #get cost taken to current node
-        node = node[0]         
-        if isinstance(problem, searchAgents.CornersProblem):
-            check = node
-        else:
-            check = node[0]     
+        state, path, totalCost = frontier.pop()                                               #get next node
 
-        if problem.isGoalState(check):                                    #if it is the goal state return the path
-            path.append(node[1])                                            #add node to path before returning
+        if problem.isGoalState(state):                                    #if it is the goal state return the path
             return path
         
-        if not node[0] in closed:                                           #if we havent visted it
-            path.append(node[1])                                            #add to the path
-            closed.add(node[0])                                          #add to the closed list
-            successors = problem.getSuccessors(check)                     #get successor nodes
-            for successor in successors:                    
-                if not successor[0] in closed:                              #if not in the closed list
-                    addNode(successor, list(path), cost, frontier)          #add to the open list
+        if not state in closed:                                           #if we havent visted it
+            closed.add(state)                                          #add to the closed list
+            successors = problem.getSuccessors(state)                     #get successor nodes
+            for nextState, action, actionCost in successors:
+                p = list(path)
+                p.append(action);
+                frontier.push((nextState, p, totalCost+actionCost))         #add to the open list
 
     return path
 
@@ -141,7 +127,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    priorityQueue = util.PriorityQueue()
+    priorityQueue = PriorityQueueWithHeuristic(nullHeuristic, problem)
 
     return graphSearch(problem, priorityQueue)
 
@@ -159,15 +145,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     return graphSearch(problem, priorityHeuristic);
 
-def addNode(node, path, cost, frontier):
-    cost += node[2]
-    if isinstance(frontier, PriorityQueueWithHeuristic):
-        frontier.push([node, path, cost])
-    elif isinstance(frontier, util.PriorityQueue):
-        frontier.push([node, path, cost], cost)
-    else:
-        frontier.push([node, path, 0])
-
 class PriorityQueueWithHeuristic(util.PriorityQueue):
     def  __init__(self, heuristic, problem):
         self.heuristic = heuristic
@@ -175,10 +152,7 @@ class PriorityQueueWithHeuristic(util.PriorityQueue):
         util.PriorityQueue.__init__(self)
 
     def push(self, node):
-        if isinstance(self.problem, searchAgents.PositionSearchProblem):
-            util.PriorityQueue.push(self, node, node[2]+ self.heuristic(node[0][0], self.problem))
-        else:
-            util.PriorityQueue.push(self, node, node[2]+ self.heuristic(node, self.problem))
+        util.PriorityQueue.push(self, node, node[2]+ self.heuristic(node[0], self.problem))
 
 
 # Abbreviations
