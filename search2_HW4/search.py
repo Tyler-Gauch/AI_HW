@@ -17,6 +17,10 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+# Tyler Gauch
+# COMP 3770 01
+# 2/25/2016
+
 import util
 import searchAgents
 

@@ -34,6 +34,11 @@ description for details.
 Good luck and happy searching!
 """
 
+# Tyler Gauch
+# COMP 3770 01
+# 2/25/2016
+
+
 from game import Directions
 from game import Agent
 from game import Actions
@@ -295,14 +300,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         
-        return (self.startingPosition, self.corners)
+        return (self.startingPosition, self.corners) # state is (position, cornersleft)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
 
-        if len(state[1]) == 0:
+        if len(state[1]) == 0: #do we have any corners left?
             return True
         return False
 
@@ -326,15 +331,15 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state[0]
-            dx, dy = Actions.directionToVector(action)
-            nextx, nexty = int(x+dx), int(y+dy)
-            hitsWall = self.walls[nextx][nexty]
-            if not hitsWall:
-                corners = state[1]
-                nextPosition = (nextx, nexty)
-                corners = tuple(x for x in corners if x != nextPosition)
-                successors.append(((nextPosition, corners), action, 1))
+            x,y = state[0]                                                      #get position
+            dx, dy = Actions.directionToVector(action)                          #get direction for action
+            nextx, nexty = int(x+dx), int(y+dy)                                 #get next position
+            hitsWall = self.walls[nextx][nexty]                                 #check if its a wall
+            if not hitsWall:                                                    #if not
+                corners = state[1]                                              #get the corners
+                nextPosition = (nextx, nexty)                                   #create the next position tuple
+                corners = tuple(x for x in corners if x != nextPosition)        #remove the position from the corners if it is a corner
+                successors.append(((nextPosition, corners), action, 1))         #return successor
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -371,24 +376,24 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    position = state[0]
-    corners = tuple(state[1]) # These are the corner coordinates
+    position = state[0]                                                 # Get the position from the satte
+    corners = tuple(state[1])                                           # These are the corner coordinates
 
     result = 0
 
-    while len(corners) > 0:
+    while len(corners) > 0:                                             #While we have no corners left
         bestDistance = -1
         bestCorner = None
-        for corner in corners:
-            distance = util.manhattanDistance(position, corner)
-            if distance < bestDistance or bestDistance < 0:
+        for corner in corners:                                          #loop through al the corners
+            distance = util.manhattanDistance(position, corner)         #find the distance from our positoin to the corner
+            if distance < bestDistance or bestDistance < 0:             #is it closest?
                 bestDistance = distance
                 bestCorner = corner
-        result += bestDistance
-        position = bestCorner
-        corners = tuple(x for x in corners if x != position)
+        result += bestDistance                                          #add that distance to our result
+        position = bestCorner                                           #move to that corner
+        corners = tuple(x for x in corners if x != position)            #remove the corner from the tuple of corners
 
-    return result
+    return result                                                       #return shortest path
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -480,22 +485,22 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    position, foodGrid = state                                                      #get the state
 
-    foodGrid = foodGrid.asList()
+    foodGrid = foodGrid.asList()                                                    #get the food coordinates
 
     result = 0
 
-    for food in foodGrid:
-        otherFoodGrid = list(foodGrid)
-        otherFoodGrid.remove(food)
-        currentResult = util.manhattanDistance(position, food)
-        bestDistance, bestFood = findNextClosestFood(food, otherFoodGrid)
-        while bestFood != None:
-            otherFoodGrid.remove(bestFood)
-            currentResult += bestDistance
-            bestDistance, bestFood = findNextClosestFood(bestFood, otherFoodGrid)
-        if currentResult < result or result == 0:
+    for food in foodGrid:                                                           #for every food
+        otherFoodGrid = list(foodGrid)                                              #get a list of the other food
+        otherFoodGrid.remove(food)                                                  #remove the current food
+        currentResult = util.manhattanDistance(position, food)                      #find the distance from our start to that food
+        bestDistance, bestFood = findNextClosestFood(food, otherFoodGrid)           #find the next closest piece of food to that food
+        while bestFood != None:                                                     #while we have another closest peice of food
+            otherFoodGrid.remove(bestFood)                                          #remove it from the list
+            currentResult += bestDistance                                           #add the distance
+            bestDistance, bestFood = findNextClosestFood(bestFood, otherFoodGrid)   #find the next closest food to the bestFood
+        if currentResult < result or result == 0:                                   #if that path was shorter thatn the previous one make that our result
             result = currentResult
 
 
@@ -504,12 +509,12 @@ def foodHeuristic(state, problem):
 def findNextClosestFood(food, grid):
     bestDistance = 0
     bestFood = None
-    for otherFood in grid:
-        distance = util.manhattanDistance(food, otherFood)
-        if distance < bestDistance or bestDistance == 0:
+    for otherFood in grid:                                      #for all the otherFood
+        distance = util.manhattanDistance(food, otherFood)      #find the distance between the food
+        if distance < bestDistance or bestDistance == 0:        #if its shorter make that the best
             bestDistance = distance
             bestFood = otherFood
-    return bestDistance, bestFood
+    return bestDistance, bestFood                               #return the best distance and food
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -578,7 +583,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
 
         food = self.food.asList()
 
-        if state in food:
+        if state in food:     #if we are at a piece of food we win
             return True
 
         return False
