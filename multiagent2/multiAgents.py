@@ -5,7 +5,7 @@ from game import Agent
 
 # Tyler Gauch
 # COMP 3770 01
-# 1/28/2015
+# 3/17/2016
 
 def scoreEvaluationFunction(currentGameState):
     """
