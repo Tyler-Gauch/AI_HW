@@ -3,6 +3,10 @@ from game import Directions
 import random, util
 from game import Agent
 
+# Tyler Gauch
+# COMP 3770 01
+# 1/28/2015
+
 def scoreEvaluationFunction(currentGameState):
     """
       This default evaluation function just returns the score of the state.
@@ -61,7 +65,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         bestAction = None
         for action in gameState.getLegalActions(0):
             tempValue = self.minValue(gameState.generateSuccessor(0, action), 1, 1)
-            print action, ' - ', tempValue
             if bestValue < tempValue:
                 bestValue = tempValue
                 bestAction = action
@@ -110,12 +113,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = float('Inf')
         for action in gameState.getLegalActions(0):
             tempValue = self.minValue(gameState.generateSuccessor(0, action), 1, 1, alpha, beta)
-            print action, ' - ', tempValue
             if alpha < tempValue:
                 alpha = tempValue
                 bestAction = action
 
-        print bestAction, ' ', alpha, '\n ', gameState
         return bestAction
 
     def value(self, gameState, agentIndex, currentDepth, alpha, beta):
@@ -210,7 +211,12 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: First thing we do is check if we won or lost.  We do not make these return infinity incase 
+                    we have more than one action that returns a terminal node the average will be higher for 
+                    a terminal node that took 1 step vs 2 steps.  Next we calculate the distance to the ghosts 
+                    and subtract the distance from the ghost.  This keeps us close enough to the ghost to keep
+                    moving but far enough away to never die.  Lastly we subtract the distance to the closest food.
+                    This says that the closer we are to the food the better.
     """
     pos = currentGameState.getPacmanPosition()
     currentFood = currentGameState.getFood()
@@ -228,7 +234,7 @@ def betterEvaluationFunction(currentGameState):
         if i == 0:
             continue
         ghostDistance = max(util.manhattanDistance(pos, currentGameState.getGhostPosition(i)), distanceThreshold)
-        score -= ghostDistance
+        score -= ghostDistance 
 
     currentFood = currentFood.asList()
 
