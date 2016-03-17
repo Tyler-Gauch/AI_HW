@@ -1,5 +1,3 @@
-# 2016.03.15 11:34:28 EDT
-#Embedded file name: multiAgents.py
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -169,14 +167,11 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         bestValue = float('-Inf')
         bestAction = None
         for action in gameState.getLegalActions(0):
-            print 'Checking action: ', action
             tempValue = self.expValue(gameState.generateSuccessor(0, action), 1, 1)
-            print action, ' - ', tempValue
             if bestValue < tempValue:
                 bestValue = tempValue
                 bestAction = action
 
-        print bestAction, ' ', bestValue, '\n ', gameState
         return bestAction
 
     def value(self, gameState, agentIndex, currentDepth):
@@ -199,6 +194,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def expValue(self, gameState, agentIndex, currentDepth):
         bestValue = 0
+        if len(gameState.getLegalActions(agentIndex)) == 0:
+            return self.evaluationFunction(gameState)
         for action in gameState.getLegalActions(agentIndex):
             bestValue += self.probability(gameState, agentIndex) * self.value(gameState.generateSuccessor(agentIndex, action), agentIndex, currentDepth)
 
@@ -208,105 +205,40 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         return 1.0 / (len(gameState.getLegalActions(agentIndex)) * 1.0)
 
 
-class AlphaBetaEvalAgent(MultiAgentSearchAgent):
-    """
-      Your minimax agent with alpha-beta pruning (question 3)
-    """
-
-    def getAction(self, gameState):
-        """
-          Returns the minimax action using self.depth and self.evaluationFunction
-        """
-        bestAction = None
-        alpha = float('-Inf')
-        beta = float('Inf')
-        for action in gameState.getLegalActions(0):
-            tempValue = self.minValue(gameState.generateSuccessor(0, action), 1, 1, alpha, beta)
-            print action, ' - ', tempValue
-            if alpha < tempValue:
-                alpha = tempValue
-                bestAction = action
-
-        print bestAction, ' ', alpha, '\n ', gameState
-        return alpha
-
-    def value(self, gameState, agentIndex, currentDepth, alpha, beta):
-        if gameState.isWin() or gameState.isLose():
-            return self.evaluationFunction(gameState)
-        elif agentIndex == gameState.getNumAgents() - 1:
-            return self.maxValue(gameState, 0, currentDepth, alpha, beta)
-        else:
-            return self.minValue(gameState, agentIndex + 1, currentDepth, alpha, beta)
-
-    def maxValue(self, gameState, agentIndex, currentDepth, alpha, beta):
-        currentDepth += 1
-        if currentDepth > self.depth:
-            return self.evaluationFunction(gameState)
-        bestValue = float('-Inf')
-        for action in gameState.getLegalActions(agentIndex):
-            bestValue = max(bestValue, self.value(gameState.generateSuccessor(agentIndex, action), agentIndex, currentDepth, alpha, beta))
-            if bestValue > beta:
-                return bestValue
-            alpha = max(alpha, bestValue)
-
-        return bestValue
-
-    def minValue(self, gameState, agentIndex, currentDepth, alpha, beta):
-        bestValue = float('Inf')
-        if len(gameState.getLegalActions(agentIndex)) == 0:
-            return self.evaluationFunction(gameState)
-        for action in gameState.getLegalActions(agentIndex):
-            bestValue = min(bestValue, self.value(gameState.generateSuccessor(agentIndex, action), agentIndex, currentDepth, alpha, beta))
-            if bestValue < alpha:
-                return bestValue
-            beta = min(beta, bestValue)
-
-        return bestValue
-
-
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
       DESCRIPTION: <write something here so we know what you did>
-      1. Avoid Ghosts
     """
-    newPos = currentGameState.getPacmanPosition()
-    newFood = currentGameState.getFood()
-    newGhostStates = currentGameState.getGhostStates()
-    newScaredTimes = [ ghostState.scaredTimer for ghostState in newGhostStates ]
-    if currentGameState.isWin():
-        return 200000
-    if currentGameState.isLose():
-        return -200000
+    pos = currentGameState.getPacmanPosition()
+    currentFood = currentGameState.getFood()
+
     score = currentGameState.getScore()
-    ghostEval = 0
-    distanceThreshold = 2
-    timeThreshold = 1
-    for i in range(len(newGhostStates)):
-        if len(newScaredTimes) > i and newScaredTimes[i] < timeThreshold:
-            ghostDistance = util.manhattanDistance(newPos, newGhostStates[i].getPosition())
-            if ghostDistance < distanceThreshold:
-                newEval = -10000 + ghostDistance
-                if ghostEval > newEval:
-                    ghostEval = newEval
 
-    if ghostEval < 0:
-        return ghostEval
-    newFood = newFood.asList()
-    if currentGameState.hasFood(newPos[0], newPos[1]):
-        score += 100
-    else:
-        closestFood = 100
-        for food in newFood:
-            distance = util.manhattanDistance(food, newPos)
-            if distance < closestFood:
-                closestFood = distance
+    if currentGameState.isWin():
+        score = 100000
+    if currentGameState.isLose():
+        score = -100000
 
-        score -= closestFood
-    agent = AlphaBetaEvalAgent('scoreEvaluationFunction', 1)
-    score += agent.getAction(currentGameState)
+    distanceThreshold = 3
+
+    for i in range(currentGameState.getNumAgents()):
+        if i == 0:
+            continue
+        ghostDistance = max(util.manhattanDistance(pos, currentGameState.getGhostPosition(i)), distanceThreshold)
+        score -= ghostDistance
+
+    currentFood = currentFood.asList()
+
+    closestFood = 100
+    for food in currentFood:
+        distance = util.manhattanDistance(food, pos)
+        closestFood = min(closestFood, distance)
+
+    score -= closestFood
+
     return score
 
 
